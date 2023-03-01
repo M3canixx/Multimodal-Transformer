@@ -78,3 +78,13 @@ class SinusoidalPositionalEmbedding(nn.Module):
     def max_positions(self):
         """Maximum number of supported positions."""
         return int(1e5)  # an arbitrary large number
+
+#
+#   /home/jbhuiyan2/scripts/Multimodal-Transformer/modules/position_embedding.py:21:
+#   UserWarning: The number of elements in the out tensor of shape [50] is 50 which 
+#   does not match the computed number of elements 500. Note that this may occur as 
+#   a result of rounding error. The out tensor will be resized to a tensor of shape (500,).
+#   (Triggered internally at
+#   /opt/conda/conda-bld/pytorch_1607370141920/work/aten/src/ATen/native/cuda/RangeFactories.cu:266.)
+#   torch.arange(padding_idx + 1, max_pos, out=getattr(make_positions, buf_name))
+#

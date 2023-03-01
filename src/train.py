@@ -41,14 +41,14 @@ def initiate(hyp_params, train_loader, valid_loader, test_loader):
         ctc_criterion = None
         ctc_a2l_module, ctc_v2l_module = None, None
         ctc_a2l_optimizer, ctc_v2l_optimizer = None, None
-    else:
-        from warpctc_pytorch import CTCLoss
-        ctc_criterion = CTCLoss()
-        ctc_a2l_module, ctc_v2l_module = get_CTC_module(hyp_params)
-        if hyp_params.use_cuda:
-            ctc_a2l_module, ctc_v2l_module = ctc_a2l_module.cuda(), ctc_v2l_module.cuda()
-        ctc_a2l_optimizer = getattr(optim, hyp_params.optim)(ctc_a2l_module.parameters(), lr=hyp_params.lr)
-        ctc_v2l_optimizer = getattr(optim, hyp_params.optim)(ctc_v2l_module.parameters(), lr=hyp_params.lr)
+    # else:
+    #     from warpctc_pytorch import CTCLoss
+    #     ctc_criterion = CTCLoss()
+    #     ctc_a2l_module, ctc_v2l_module = get_CTC_module(hyp_params)
+    #     if hyp_params.use_cuda:
+    #         ctc_a2l_module, ctc_v2l_module = ctc_a2l_module.cuda(), ctc_v2l_module.cuda()
+    #     ctc_a2l_optimizer = getattr(optim, hyp_params.optim)(ctc_a2l_module.parameters(), lr=hyp_params.lr)
+    #     ctc_v2l_optimizer = getattr(optim, hyp_params.optim)(ctc_v2l_module.parameters(), lr=hyp_params.lr)
     
     scheduler = ReduceLROnPlateau(optimizer, mode='min', patience=hyp_params.when, factor=0.1, verbose=True)
     settings = {'model': model,
@@ -108,29 +108,29 @@ def train_model(settings, hyp_params, train_loader, valid_loader, test_loader):
             batch_chunk = hyp_params.batch_chunk
             
             ######## CTC STARTS ######## Do not worry about this if not working on CTC
-            if ctc_criterion is not None:
-                ctc_a2l_net = nn.DataParallel(ctc_a2l_module) if batch_size > 10 else ctc_a2l_module
-                ctc_v2l_net = nn.DataParallel(ctc_v2l_module) if batch_size > 10 else ctc_v2l_module
+            # if ctc_criterion is not None:
+            #     ctc_a2l_net = nn.DataParallel(ctc_a2l_module) if batch_size > 10 else ctc_a2l_module
+            #     ctc_v2l_net = nn.DataParallel(ctc_v2l_module) if batch_size > 10 else ctc_v2l_module
 
-                audio, a2l_position = ctc_a2l_net(audio) # audio now is the aligned to text
-                vision, v2l_position = ctc_v2l_net(vision)
+            #     audio, a2l_position = ctc_a2l_net(audio) # audio now is the aligned to text
+            #     vision, v2l_position = ctc_v2l_net(vision)
                 
-                ## Compute the ctc loss
-                l_len, a_len, v_len = hyp_params.l_len, hyp_params.a_len, hyp_params.v_len
-                # Output Labels
-                l_position = torch.tensor([i+1 for i in range(l_len)]*batch_size).int().cpu()
-                # Specifying each output length
-                l_length = torch.tensor([l_len]*batch_size).int().cpu()
-                # Specifying each input length
-                a_length = torch.tensor([a_len]*batch_size).int().cpu()
-                v_length = torch.tensor([v_len]*batch_size).int().cpu()
+            #     ## Compute the ctc loss
+            #     l_len, a_len, v_len = hyp_params.l_len, hyp_params.a_len, hyp_params.v_len
+            #     # Output Labels
+            #     l_position = torch.tensor([i+1 for i in range(l_len)]*batch_size).int().cpu()
+            #     # Specifying each output length
+            #     l_length = torch.tensor([l_len]*batch_size).int().cpu()
+            #     # Specifying each input length
+            #     a_length = torch.tensor([a_len]*batch_size).int().cpu()
+            #     v_length = torch.tensor([v_len]*batch_size).int().cpu()
                 
-                ctc_a2l_loss = ctc_criterion(a2l_position.transpose(0,1).cpu(), l_position, a_length, l_length)
-                ctc_v2l_loss = ctc_criterion(v2l_position.transpose(0,1).cpu(), l_position, v_length, l_length)
-                ctc_loss = ctc_a2l_loss + ctc_v2l_loss
-                ctc_loss = ctc_loss.cuda() if hyp_params.use_cuda else ctc_loss
-            else:
-                ctc_loss = 0
+            #     ctc_a2l_loss = ctc_criterion(a2l_position.transpose(0,1).cpu(), l_position, a_length, l_length)
+            #     ctc_v2l_loss = ctc_criterion(v2l_position.transpose(0,1).cpu(), l_position, v_length, l_length)
+            #     ctc_loss = ctc_a2l_loss + ctc_v2l_loss
+            #     ctc_loss = ctc_loss.cuda() if hyp_params.use_cuda else ctc_loss
+            # else:
+            ctc_loss = 0
             ######## CTC ENDS ########
                 
             combined_loss = 0
